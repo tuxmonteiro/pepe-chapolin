@@ -1,1 +1,13 @@
+build:
+  project: '@project.artifactId@'
+  timestamp: '@timestamp@'
+  version: '@project.version@'
 
+pepe:
+  chapolin:
+    sync_delay: ${SCHED:10000}
+  logging:
+    tags: ${LOGGING_TAGS:default}
+
+amqp:
+  url: ${RABBIT_URL:amqp://guest:guest@127.0.0.1}
