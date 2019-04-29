@@ -22,7 +22,6 @@ public class StackstormService {
         requestService.closeAsyncHttpClient();
     }
 
-    @PostConstruct
     public void createTrigger() throws ExecutionException, InterruptedException {
         Boolean triggerExists =  requestService.checkIfTriggerExists(triggerPath, triggerName);
         if (!triggerExists){
