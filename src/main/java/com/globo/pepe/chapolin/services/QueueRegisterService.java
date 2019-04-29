@@ -44,6 +44,7 @@ public class QueueRegisterService {
                 logger.message(e.getMessage()).sendError(e);
             }
         };
+        amqpService.newQueue(queue);
         amqpService.prepareListenersMap(queue);
         amqpService.registerListener(queue, messageListener);
     }
