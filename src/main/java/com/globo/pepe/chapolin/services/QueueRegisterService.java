@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.services.AmqpService;
 import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.common.services.JsonLoggerService.JsonLogger;
+import com.rabbitmq.http.client.domain.QueueInfo;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.amqp.core.MessageListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -51,7 +53,8 @@ public class QueueRegisterService {
             logger.message("syncronizing queues").sendDebug();
         }
 
-        final Set<String> queues = amqpService.queuesFromRabbit("pepe.trigger.");
+        final Set<String> queues = amqpService.queuesFromRabbit("pepe.trigger.")
+            .stream().map(QueueInfo::getName).collect(Collectors.toSet());
         queues.stream().filter(q -> !amqpService.hasQueue(q)).forEach(this::register);
         final Set<String> queuesRemoved = new HashSet<>(amqpService.queuesRegistered());
         queuesRemoved.removeAll(queues);
