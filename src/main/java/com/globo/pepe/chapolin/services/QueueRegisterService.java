@@ -34,10 +34,10 @@ public class QueueRegisterService {
         final MessageListener messageListener = message -> {
             try {
                 byte[] messageBody = message.getBody();
-                logger.put("short_message", "send " + new String(messageBody)).put("queue", queue).sendInfo();
+                logger.message("send " + new String(messageBody)).put("queue", queue).sendInfo();
                 stackStormService.send(mapper.readTree(messageBody));
             } catch (IOException e) {
-                logger.put("short_message", e.getMessage()).sendError(e);
+                logger.message(e.getMessage()).sendError(e);
             }
         };
         amqpService.prepareListenersMap(queue);
@@ -47,7 +47,9 @@ public class QueueRegisterService {
     @Scheduled(fixedDelayString = "${pepe.chapolin.sync_delay}")
     public void syncDelay() {
         JsonLogger logger = jsonLoggerService.newLogger(getClass());
-        logger.put("short_message","syncronizing queues").sendInfo();
+        if (logger.isDebugEnabled()) {
+            logger.message("syncronizing queues").sendDebug();
+        }
 
         final Set<String> queues = amqpService.queuesFromRabbit("pepe.trigger.");
         queues.stream().filter(q -> !amqpService.hasQueue(q)).forEach(this::register);
