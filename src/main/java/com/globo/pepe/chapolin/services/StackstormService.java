@@ -1,7 +1,7 @@
 package com.globo.pepe.chapolin.services;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.stereotype.Service;
-import javax.annotation.PostConstruct;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -17,9 +17,8 @@ public class StackstormService {
         this.requestService = requestService;
     }
 
-    public void send() throws ExecutionException, InterruptedException {
-        System.out.println(requestService.getResponseBody());
-        requestService.closeAsyncHttpClient();
+    public void send(JsonNode jsonNode) {
+        // WIP
     }
 
     public void createTrigger() throws ExecutionException, InterruptedException {

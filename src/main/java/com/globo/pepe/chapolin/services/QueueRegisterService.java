@@ -1,6 +1,5 @@
 package com.globo.pepe.chapolin.services;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.services.AmqpService;
 import com.globo.pepe.common.services.JsonLoggerService;
@@ -20,15 +19,18 @@ public class QueueRegisterService {
     private final AmqpService amqpService;
     private final ObjectMapper mapper;
     private final JsonLoggerService jsonLoggerService;
-    private final IStackStormService stackStormService = jsonNode -> {};
+    private final StackstormService stackstormService;
 
     public QueueRegisterService(
         AmqpService amqpService,
         ObjectMapper mapper,
-        JsonLoggerService jsonLoggerService) {
+        JsonLoggerService jsonLoggerService,
+        StackstormService stackstormService) {
+
         this.amqpService = amqpService;
         this.mapper = mapper;
         this.jsonLoggerService = jsonLoggerService;
+        this.stackstormService = stackstormService;
     }
 
     public void register(String queue) {
@@ -37,7 +39,7 @@ public class QueueRegisterService {
             try {
                 byte[] messageBody = message.getBody();
                 logger.message("send " + new String(messageBody)).put("queue", queue).sendInfo();
-                stackStormService.send(mapper.readTree(messageBody));
+                stackstormService.send(mapper.readTree(messageBody));
             } catch (IOException e) {
                 logger.message(e.getMessage()).sendError(e);
             }
@@ -59,11 +61,6 @@ public class QueueRegisterService {
         final Set<String> queuesRemoved = new HashSet<>(amqpService.queuesRegistered());
         queuesRemoved.removeAll(queues);
         queuesRemoved.forEach(amqpService::stopListener);
-    }
-
-    @FunctionalInterface
-    interface IStackStormService {
-        void send(JsonNode jsonNode);
     }
 
 }
