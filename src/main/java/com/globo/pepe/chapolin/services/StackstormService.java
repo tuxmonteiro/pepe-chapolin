@@ -18,13 +18,11 @@ package com.globo.pepe.chapolin.services;
 
 import static com.globo.pepe.common.util.Constants.TRIGGER_PREFIX;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.model.Event;
 import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.common.services.JsonLoggerService.JsonLogger;
-import java.util.concurrent.ExecutionException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -50,68 +48,54 @@ public class StackstormService {
     public boolean send(JsonNode jsonNode) {
         try {
             return new Sender(jsonNode).send();
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             loggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
         }
         return false;
     }
 
-    class Sender {
+    private class Sender {
 
         private final Event event;
-        private final String triggerName;
+        private final String triggerFullName;
         private final JsonNode originalJson;
 
-        private Sender(JsonNode jsonNode) throws JsonProcessingException {
+        private Sender(JsonNode jsonNode) throws Exception {
             this.event = mapper.treeToValue(jsonNode, Event.class);
-            this.triggerName = extractTriggerInfo();
+            this.triggerFullName = TRIGGER_PREFIX + "." + extractTriggerInfo();
             this.originalJson = jsonNode;
         }
 
-        public boolean send() {
-            try {
-                createTriggerIfNecessary();
-                sendToTrigger();
-                return true;
-            } catch (Exception e) {
-                loggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
-            }
-            return false;
+        boolean send() throws Exception {
+            createTriggerIfNecessary();
+            return sendToTrigger();
         }
 
-        public void sendToTrigger() {
+        boolean sendToTrigger() throws Exception {
             final JsonLogger logger = loggerService.newLogger(getClass());
-            try {
-                logger.message("send event ID " + event.getId() +
-                    " to trigger " + TRIGGER_PREFIX + "." + triggerName).sendInfo();
-                if (logger.isDebugEnabled()) {
-                    System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(originalJson));
-                }
-            } catch (JsonProcessingException e) {
-                logger.message(e.getMessage()).sendError();
+            logger.message("send event ID " + event.getId() +
+                    " to trigger " + triggerFullName).sendInfo();
+            if (logger.isDebugEnabled()) {
+                System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(originalJson));
             }
+            return requestService.sendToTrigger(triggerFullName, originalJson);
         }
 
-        public String extractTriggerInfo() throws RuntimeException {
+        String extractTriggerInfo() {
             return event.getMetadata().getTriggerName();
         }
 
-        public void createTriggerIfNecessary() {
+        void createTriggerIfNecessary() throws Exception {
             final JsonLogger logger = loggerService.newLogger(getClass());
-            try {
-                Boolean triggerExists = requestService.checkIfTriggerExists(triggerName);
-                if (!triggerExists) {
-                    JsonNode schema = jsonSchemaGeneratorService.extract(originalJson);
-                    requestService.createTrigger(triggerName, schema);
-                    logger.message("trigger " + triggerName + " created. Using schema: " + schema.toString()).sendInfo();
-                } else {
-                    logger.message("trigger " + triggerName + " already exist.").sendInfo();
-                }
-            } catch (ExecutionException | InterruptedException e) {
-                logger.message(e.getMessage()).sendError(e);
+            Boolean triggerExists = requestService.checkIfTriggerExists(triggerFullName);
+            if (!triggerExists) {
+                JsonNode schema = jsonSchemaGeneratorService.extract(originalJson);
+                requestService.createTrigger(schema);
+                logger.message("trigger " + triggerFullName + " created. Using schema: " + schema.toString()).sendInfo();
+            } else {
+                logger.message("trigger " + triggerFullName + " already exist.").sendInfo();
             }
         }
-
 
     }
 }

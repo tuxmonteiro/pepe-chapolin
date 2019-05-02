@@ -18,14 +18,15 @@ package com.globo.pepe.chapolin.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.globo.pepe.common.services.JsonLoggerService;
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Dsl;
 import org.asynchttpclient.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Component
 public class RequestService {
@@ -36,7 +37,7 @@ public class RequestService {
     private String stackStormUrl;
 
     @Value("${pepe.chapolin.stackstorm.key}")
-    private String stackStormKey;
+    private String stackstormKey;
 
     private AsyncHttpClient asyncHttpClient = Dsl.asyncHttpClient(Dsl.config()
         .setConnectionTtl(10000)
@@ -45,45 +46,50 @@ public class RequestService {
         .build());
 
     private final ObjectMapper mapper;
-    private final JsonLoggerService jsonLoggerService;
 
-    public RequestService(ObjectMapper mapper, JsonLoggerService jsonLoggerService) {
+    public RequestService(ObjectMapper mapper) {
         this.mapper = mapper;
-        this.jsonLoggerService = jsonLoggerService;
     }
 
-    public String getResponseBody() throws ExecutionException, InterruptedException {
-        return asyncHttpClient.prepareGet(stackStormUrl).execute().get().getResponseBody();
-
-    }
-
-    public Boolean checkIfTriggerExists(String triggerName) throws ExecutionException, InterruptedException {
-        String checkTriggerURL = stackStormUrl + "/api/triggertypes/" + triggerName;
-        System.out.println(checkTriggerURL);
-        String response = asyncHttpClient.prepareGet(checkTriggerURL)
-                .addHeader(ST2_API_KEY_HEADER, stackStormKey)
-                .execute()
-                .get()
-                .getResponseBody();
-        JsonNode ref;
-        try {
-            return (ref = mapper.readTree(response).get("ref")) != null && triggerName.equals(ref.asText());
-        } catch (IOException e) {
-            jsonLoggerService.newLogger(getClass()).message(e.getMessage()).sendError();
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean createTrigger(String triggerName, JsonNode schema) throws ExecutionException, InterruptedException {
-        String createTriggerURL = stackStormUrl + "/v1/webhooks/st2";
-        Response response = asyncHttpClient.preparePost(createTriggerURL)
-                .addHeader(ST2_API_KEY_HEADER, stackStormKey)
-                .setBody((schema).toString())
+    private Response get(String checkTriggerURL) throws Exception {
+        return asyncHttpClient.prepareGet(checkTriggerURL)
+                .addHeader(ST2_API_KEY_HEADER, stackstormKey)
                 .execute()
                 .get();
+    }
+
+    private Response post(String createTriggerURL, String requestBody) throws Exception {
+        return asyncHttpClient.preparePost(createTriggerURL)
+                .addHeader(ST2_API_KEY_HEADER, stackstormKey)
+                .addHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .setBody(requestBody)
+                .execute()
+                .get();
+    }
+
+    public Boolean checkIfTriggerExists(String triggerName) throws Exception {
+        String checkTriggerURL = stackStormUrl + "/api/triggertypes/" + triggerName;
+        Response response = get(checkTriggerURL);
+        JsonNode ref;
+        return response.getStatusCode() == 200 &&
+                (ref = mapper.readTree(response.getResponseBody()).get("ref")) != null &&
+                triggerName.equals(ref.asText());
+    }
+
+    public boolean createTrigger(JsonNode schema) throws Exception {
+        String createTriggerURL = stackStormUrl + "/api/triggertypes";
+        Response response = post(createTriggerURL, schema.toString());
         return response.getStatusCode() == 201;
     }
+
+    public boolean sendToTrigger(String triggerName, JsonNode payload) throws Exception {
+        String sendToTriggerURL = stackStormUrl + "/v1/webhooks/st2";
+        final ObjectNode requestBody = mapper.createObjectNode();
+        requestBody.put("trigger", triggerName).set("payload", payload);
+        Response response = post(sendToTriggerURL, requestBody.toString());
+        return response.getStatusCode() == 201;
+    }
+
 }
 
 
