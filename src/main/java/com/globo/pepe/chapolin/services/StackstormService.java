@@ -16,6 +16,7 @@
 
 package com.globo.pepe.chapolin.services;
 
+import static com.globo.pepe.common.util.Constants.PACK_NAME;
 import static com.globo.pepe.common.util.Constants.TRIGGER_PREFIX;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -62,7 +63,7 @@ public class StackstormService {
 
         private Sender(JsonNode jsonNode) throws Exception {
             this.event = mapper.treeToValue(jsonNode, Event.class);
-            this.triggerFullName = TRIGGER_PREFIX + "." + extractTriggerInfo();
+            this.triggerFullName = PACK_NAME + "." + TRIGGER_PREFIX + "." + extractTriggerInfo();
             this.originalJson = jsonNode;
         }
 

@@ -16,6 +16,7 @@
 
 package com.globo.pepe.chapolin.services;
 
+import static com.globo.pepe.common.util.Constants.PACK_NAME;
 import static com.globo.pepe.common.util.Constants.TRIGGER_PREFIX;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -54,10 +55,11 @@ public class JsonSchemaGeneratorService {
         }
 
         public JsonNode extractSchema() {
-            ObjectNode schema = mapper.createObjectNode().put("name", triggerName)
-                .put("description", triggerName)
-                .put("pack", "pepe.trigger")
-                .put("uid", "trigger_type:" + TRIGGER_PREFIX + "." + triggerName);
+            String triggerFullName = TRIGGER_PREFIX + "." + triggerName;
+            ObjectNode schema = mapper.createObjectNode().put("name", triggerFullName)
+                .put("description", triggerFullName)
+                .put("pack", PACK_NAME)
+                .put("uid", "trigger_type:" + PACK_NAME + ":" + triggerFullName);
 
             ObjectNode payload_schema = mapper.createObjectNode();
             ObjectNode properties = mapper.createObjectNode();

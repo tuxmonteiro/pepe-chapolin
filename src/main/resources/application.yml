@@ -7,7 +7,7 @@ pepe:
   chapolin:
     sync_delay: ${SCHED:10000}
     stackstorm:
-      url: ${STACKSTORM_URL:http://127.0.0.0:9101}
+      url: ${STACKSTORM_URL:http://127.0.0.0:9101/v1}
       key: ${STACKSTORM_KEY:NOT_KEY}
   logging:
     tags: ${LOGGING_TAGS:default}
