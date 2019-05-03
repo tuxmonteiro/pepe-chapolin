@@ -16,6 +16,9 @@
 
 package com.globo.pepe.chapolin.services;
 
+import static com.globo.pepe.common.util.Constants.PACK_NAME;
+import static com.globo.pepe.common.util.Constants.TRIGGER_PREFIX;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globo.pepe.common.services.AmqpService;
 import com.globo.pepe.common.services.JsonLoggerService;
@@ -72,7 +75,7 @@ public class QueueRegisterService {
             logger.message("syncronizing queues").sendDebug();
         }
 
-        final Set<String> queues = amqpService.queuesFromRabbit("pepe.trigger.")
+        final Set<String> queues = amqpService.queuesFromRabbit(PACK_NAME + "." + TRIGGER_PREFIX + ".")
             .stream().map(QueueInfo::getName).collect(Collectors.toSet());
         queues.stream().filter(q -> !amqpService.hasQueue(q)).forEach(this::register);
         final Set<String> queuesRemoved = new HashSet<>(amqpService.queuesRegistered());
