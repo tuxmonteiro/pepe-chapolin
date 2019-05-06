@@ -25,10 +25,13 @@ import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.common.services.JsonLoggerService.JsonLogger;
 import com.rabbitmq.http.client.domain.QueueInfo;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +42,9 @@ public class QueueRegisterService {
     private final ObjectMapper mapper;
     private final JsonLoggerService jsonLoggerService;
     private final StackstormService stackstormService;
+
+    @Value("${pepe.event.ttl}")
+    private Long eventTtl;
 
     public QueueRegisterService(
         AmqpService amqpService,
@@ -55,17 +61,25 @@ public class QueueRegisterService {
     public void register(String queue) {
         JsonLogger logger = jsonLoggerService.newLogger(getClass());
         final MessageListener messageListener = message -> {
+            boolean wasSend = false;
             try {
                 byte[] messageBody = message.getBody();
                 logger.message("send " + new String(messageBody)).put("queue", queue).sendInfo();
-                stackstormService.send(mapper.readTree(messageBody));
+                wasSend = stackstormService.send(mapper.readTree(messageBody));
             } catch (IOException e) {
                 logger.message(e.getMessage()).sendError(e);
+            }
+            if (!wasSend) {
+                retryEventOnFail(queue, message);
             }
         };
         amqpService.newQueue(queue);
         amqpService.prepareListenersMap(queue);
         amqpService.registerListener(queue, messageListener);
+    }
+
+    private void retryEventOnFail(String queue, Message message) {
+        amqpService.convertAndSend(queue, Arrays.toString(message.getBody()), eventTtl);
     }
 
     @Scheduled(fixedDelayString = "${pepe.chapolin.sync_delay}")

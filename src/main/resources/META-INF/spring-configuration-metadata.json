@@ -24,6 +24,11 @@
       "name": "pepe.logging.tags",
       "type": "java.lang.String",
       "description": "Define logging tags (useful to Graylog)."
+    },
+    {
+      "name": "pepe.event.ttl",
+      "type": "java.lang.Long",
+      "description": "Event TTL"
     }
   ]
 }

@@ -11,6 +11,8 @@ pepe:
       key: ${STACKSTORM_KEY:NOT_KEY}
   logging:
     tags: ${LOGGING_TAGS:default}
+  event:
+    ttl: ${EVENT_TTL:10000}
 
 amqp:
   url: ${RABBIT_URL:amqp://guest:guest@127.0.0.1}
