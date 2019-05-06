@@ -80,6 +80,9 @@ public class RequestService {
     public Boolean checkIfTriggerExists(String triggerName) throws Exception {
         String checkTriggerURL = stackStormUrl + "/triggertypes/" + triggerName;
         Response response = get(checkTriggerURL);
+        if (response.getStatusCode() >= 500) {
+            throw new RuntimeException("ST2 Server Error: " + response.getResponseBody());
+        }
         JsonNode ref;
         return response.getStatusCode() == 200 &&
                 (ref = mapper.readTree(response.getResponseBody()).get("ref")) != null &&

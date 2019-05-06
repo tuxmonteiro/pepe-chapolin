@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.globo.pepe.common.model.Event;
 import com.globo.pepe.common.model.Metadata;
 import com.globo.pepe.common.services.JsonLoggerService;
-import java.net.ConnectException;
 import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
@@ -93,7 +92,7 @@ public class StackstormServiceTests {
         mockServer = ClientAndServer.startClientAndServer(9101);
     }
 
-    public void mockSendTriggerCreatedTest() throws IOException {
+    public void mockSendTriggerCreated() throws IOException {
         mockServer.reset();
 
         InputStream triggerExists = StackstormServiceTests.class.getResourceAsStream("/trigger-exists.json");
@@ -108,7 +107,7 @@ public class StackstormServiceTests {
 
     }
 
-    public void mockSendTriggerNotCreatedTest() throws IOException {
+    public void mockSendTriggerNotCreated() throws IOException {
         mockServer.reset();
 
         InputStream triggerExistsFail = StackstormServiceTests.class.getResourceAsStream("/trigger-exists-fail.json");
@@ -128,7 +127,7 @@ public class StackstormServiceTests {
 
     }
 
-    public void mockCreateTriggerWithoutNameTest() throws IOException {
+    public void mockCreateTriggerWithoutName() throws IOException {
         mockServer.reset();
 
         InputStream triggerNotFoundWithoutName = StackstormServiceTests.class.getResourceAsStream("/trigger-without-name.json");
@@ -148,6 +147,13 @@ public class StackstormServiceTests {
 
     }
 
+    public void mockTriggerExist500() {
+        mockServer.reset();
+
+        mockServer.when(request().withMethod("GET").withPath("/api/v1/triggertypes/"+ triggerFullNameCreated))
+            .respond(response().withStatusCode(500));
+    }
+
     @Test
     public void sendTriggerCreatedTest() throws IOException {
         Event event = new Event();
@@ -163,7 +169,7 @@ public class StackstormServiceTests {
         event.setPayload(payload);
 
         startMockServer();
-        mockSendTriggerCreatedTest();
+        mockSendTriggerCreated();
 
         assertTrue(stackstormService.send(mapper.valueToTree(event)));
         stopMockServer();
@@ -185,7 +191,7 @@ public class StackstormServiceTests {
         event.setPayload(payload);
 
         startMockServer();
-        mockSendTriggerNotCreatedTest();
+        mockSendTriggerNotCreated();
 
         assertTrue(stackstormService.send(mapper.valueToTree(event)));
         stopMockServer();
@@ -207,7 +213,7 @@ public class StackstormServiceTests {
         event.setPayload(payload);
 
         startMockServer();
-        mockCreateTriggerWithoutNameTest();
+        mockCreateTriggerWithoutName();
 
         assertTrue(stackstormService.send(mapper.valueToTree(event)));
         stopMockServer();
@@ -271,7 +277,7 @@ public class StackstormServiceTests {
         requestService.createTrigger(schema);
     }
 
-    @Test(expected = ExecutionException.class)
+    @Test(expected = RuntimeException.class)
     public void checkConnectionFailedSendToTriggerTest() throws Exception {
 
         Event event = new Event();
@@ -286,7 +292,12 @@ public class StackstormServiceTests {
         event.setMetadata(metadata);
         event.setPayload(payload);
 
-        stackstormService.sender(mapper.valueToTree(event)).sendToTrigger();
+        startMockServer();
+        mockTriggerExist500();
+
+        stackstormService.sender(mapper.valueToTree(event)).createTriggerIfNecessary();
+
+        stopMockServer();
 
     }
 
