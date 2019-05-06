@@ -1,4 +1,4 @@
-package com.globo.pepe.chapolin;
+package com.globo.pepe.chapolin.services;
 
 
 import static com.globo.pepe.chapolin.services.RequestService.X_PEPE_TRIGGER_HEADER;
@@ -7,14 +7,10 @@ import static com.globo.pepe.common.util.Constants.TRIGGER_PREFIX;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.globo.pepe.chapolin.services.JsonSchemaGeneratorService;
-import com.globo.pepe.chapolin.services.RequestService;
-import com.globo.pepe.chapolin.services.StackstormService;
 import com.globo.pepe.common.model.Event;
 import com.globo.pepe.common.model.Metadata;
 import com.globo.pepe.common.services.JsonLoggerService;
 import org.apache.commons.io.IOUtils;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
