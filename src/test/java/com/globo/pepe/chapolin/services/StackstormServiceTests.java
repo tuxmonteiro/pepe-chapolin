@@ -5,11 +5,14 @@ import static com.globo.pepe.chapolin.services.RequestService.X_PEPE_TRIGGER_HEA
 import static com.globo.pepe.common.util.Constants.PACK_NAME;
 import static com.globo.pepe.common.util.Constants.TRIGGER_PREFIX;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.globo.pepe.common.model.Event;
 import com.globo.pepe.common.model.Metadata;
 import com.globo.pepe.common.services.JsonLoggerService;
+import java.net.ConnectException;
+import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -55,6 +58,12 @@ public class StackstormServiceTests {
 
     @Autowired
     public StackstormService stackstormService;
+
+    @Autowired
+    public RequestService requestService;
+
+    @Autowired
+    public JsonSchemaGeneratorService jsonSchemaGeneratorService;
 
     ObjectMapper mapper = new ObjectMapper();
 
@@ -205,8 +214,8 @@ public class StackstormServiceTests {
 
     }
 
-    @Test
-    public void checkTriggerFailTest(){
+    @Test(expected = ExecutionException.class)
+    public void checkConnectionFailedCreateTriggerIfNecessaryTest() throws Exception {
 
         Event event = new Event();
         event.setId("1");
@@ -220,7 +229,64 @@ public class StackstormServiceTests {
         event.setMetadata(metadata);
         event.setPayload(payload);
 
-        assertFalse(stackstormService.send(mapper.valueToTree(event)));
+        stackstormService.sender(mapper.valueToTree(event)).createTriggerIfNecessary();
+
+    }
+
+    @Test(expected = ExecutionException.class)
+    public void checkConnectionFailedCheckIfTriggerExistsTest() throws Exception {
+
+        Event event = new Event();
+        event.setId("1");
+
+        Metadata metadata = new Metadata();
+        metadata.setTriggerName(triggerNameCreated);
+
+        ObjectNode payload = mapper.createObjectNode();
+        payload.put("attribute1", "value1");
+
+        event.setMetadata(metadata);
+        event.setPayload(payload);
+
+        requestService.checkIfTriggerExists(triggerNameCreated);
+
+    }
+
+    @Test(expected = ExecutionException.class)
+    public void checkConnectionFailedCreateTriggerTest() throws Exception {
+
+        Event event = new Event();
+        event.setId("1");
+
+        Metadata metadata = new Metadata();
+        metadata.setTriggerName(triggerNameCreated);
+
+        ObjectNode payload = mapper.createObjectNode();
+        payload.put("attribute1", "value1");
+
+        event.setMetadata(metadata);
+        event.setPayload(payload);
+
+        JsonNode schema = jsonSchemaGeneratorService.extract(mapper.valueToTree(event));
+        requestService.createTrigger(schema);
+    }
+
+    @Test(expected = ExecutionException.class)
+    public void checkConnectionFailedSendToTriggerTest() throws Exception {
+
+        Event event = new Event();
+        event.setId("1");
+
+        Metadata metadata = new Metadata();
+        metadata.setTriggerName(triggerNameCreated);
+
+        ObjectNode payload = mapper.createObjectNode();
+        payload.put("attribute1", "value1");
+
+        event.setMetadata(metadata);
+        event.setPayload(payload);
+
+        stackstormService.sender(mapper.valueToTree(event)).sendToTrigger();
 
     }
 

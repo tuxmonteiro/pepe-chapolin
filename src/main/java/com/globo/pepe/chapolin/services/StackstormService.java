@@ -48,14 +48,18 @@ public class StackstormService {
 
     public boolean send(JsonNode jsonNode) {
         try {
-            return new Sender(jsonNode).send();
+            return sender(jsonNode).send();
         } catch (Exception e) {
             loggerService.newLogger(getClass()).message(e.getMessage()).sendError(e);
         }
         return false;
     }
 
-    private class Sender {
+    Sender sender(JsonNode jsonNode) throws Exception {
+        return new Sender(jsonNode);
+    }
+
+    class Sender {
 
         private final Event event;
         private final String triggerFullName;
