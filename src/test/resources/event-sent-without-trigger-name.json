@@ -1,0 +1,6 @@
+{
+  "trigger": "pepe.trigger.",
+  "payload": {
+    "attribute1": "value1"
+  }
+}

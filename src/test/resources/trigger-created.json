@@ -1,0 +1,18 @@
+{
+  "uid": "trigger_type:pepe:trigger.triggerNameNotCreated",
+  "parameters_schema": {},
+  "tags": [],
+  "name": "trigger.triggerNameNotCreated",
+  "payload_schema": {
+    "type": "object",
+    "properties": {
+      "attribute1": {
+        "default": "xxxx",
+        "type": "string"
+      }
+    }
+  },
+  "ref": "pepe.trigger.triggerNameNotCreated",
+  "id": "5ccc8eb565d69201625f9acd",
+  "pack": "pepe"
+}
