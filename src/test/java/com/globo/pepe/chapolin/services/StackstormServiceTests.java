@@ -4,8 +4,8 @@ package com.globo.pepe.chapolin.services;
 import static com.globo.pepe.chapolin.services.RequestService.X_PEPE_TRIGGER_HEADER;
 import static com.globo.pepe.common.util.Constants.PACK_NAME;
 import static com.globo.pepe.common.util.Constants.TRIGGER_PREFIX;
+import static com.globo.pepe.chapolin.suites.PepeSuiteTests.mockServer;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.globo.pepe.common.model.Event;
@@ -13,15 +13,13 @@ import com.globo.pepe.common.model.Metadata;
 import com.globo.pepe.common.services.JsonLoggerService;
 import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.IOUtils;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.mockserver.integration.ClientAndServer;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import java.io.IOException;
@@ -53,44 +51,10 @@ public class StackstormServiceTests {
     private static final String triggerNameEmpty = "";
     private static final String triggerFullNameEmpty = PACK_NAME + "." + TRIGGER_PREFIX + "." + triggerNameEmpty;
 
-    private ClientAndServer mockServer;
-
     @Autowired
     public StackstormService stackstormService;
 
-    @Autowired
-    public RequestService requestService;
-
-    @Autowired
-    public JsonSchemaGeneratorService jsonSchemaGeneratorService;
-
     ObjectMapper mapper = new ObjectMapper();
-
-    @BeforeClass
-    public static void setupClass() throws IOException {
-
-
-//        1st case: Trigger already exists
-//        2nd case: Trigger don't exist
-//        3rd case: (1st) then only send event
-//        4th case: (2nd) then create trigger
-//        5th case: (4th) trigger created
-//        6th case: (5th) trigger don't create
-//        7th case: (5th, 6th) event sent
-//        8th case: (7th, 3rd) error sending event
-
-    }
-
-
-    public void stopMockServer(){
-        if (mockServer.isRunning()){
-            mockServer.stop();
-        }
-    }
-
-    public void startMockServer(){
-        mockServer = ClientAndServer.startClientAndServer(9101);
-    }
 
     public void mockSendTriggerCreated() throws IOException {
         mockServer.reset();
@@ -112,12 +76,12 @@ public class StackstormServiceTests {
 
         InputStream triggerExistsFail = StackstormServiceTests.class.getResourceAsStream("/trigger-exists-fail.json");
         String bodyTriggerExistsFail = IOUtils.toString(triggerExistsFail, Charset.defaultCharset());
-        mockServer.when(request().withMethod("GET").withPath("/api/v1/triggertypes/"+ triggerFullNameNotCreated))
+        mockServer.when(request().withMethod("GET").withPath("/api/v1/triggertypes/" + triggerFullNameNotCreated))
                 .respond(response().withBody(bodyTriggerExistsFail).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(404));
 
         InputStream triggerCreated = StackstormServiceTests.class.getResourceAsStream("/trigger-created.json");
         String bodyTriggerCreated = IOUtils.toString(triggerCreated, Charset.defaultCharset());
-        mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes").withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameNotCreated))
+        mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes/" + triggerFullNameNotCreated).withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameNotCreated))
                 .respond(response().withBody(bodyTriggerCreated).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(201));
 
         InputStream eventSentWithNewTrigger = StackstormServiceTests.class.getResourceAsStream("/event-sent.json");
@@ -140,11 +104,6 @@ public class StackstormServiceTests {
         mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes").withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameEmpty))
                 .respond(response().withBody(bodyTriggerNotCreated).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(400));
 
-        InputStream eventSentWithoutTriggerName = StackstormServiceTests.class.getResourceAsStream("/event-sent-without-trigger-name.json");
-        String bodyEventSentWithoutTriggerName = IOUtils.toString(eventSentWithoutTriggerName, Charset.defaultCharset());
-        mockServer.when(request().withMethod("POST").withPath("/api/v1/webhooks/st2").withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameEmpty))
-                .respond(response().withBody(bodyEventSentWithoutTriggerName).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(202));
-
     }
 
     public void mockTriggerExist500() {
@@ -152,6 +111,35 @@ public class StackstormServiceTests {
 
         mockServer.when(request().withMethod("GET").withPath("/api/v1/triggertypes/"+ triggerFullNameCreated))
             .respond(response().withStatusCode(500));
+    }
+
+    public void mockCreateTrigger500() throws IOException {
+        mockServer.reset();
+
+        InputStream triggerExistsFail = StackstormServiceTests.class.getResourceAsStream("/trigger-exists-fail.json");
+        String bodyTriggerExistsFail = IOUtils.toString(triggerExistsFail, Charset.defaultCharset());
+        mockServer.when(request().withMethod("GET").withPath("/api/v1/triggertypes/"+ triggerFullNameNotCreated))
+                .respond(response().withBody(bodyTriggerExistsFail).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(404));
+
+        mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes/"+ triggerFullNameNotCreated))
+                .respond(response().withStatusCode(500));
+    }
+
+    public void mockSendTrigger500() throws IOException {
+        mockServer.reset();
+
+        InputStream triggerExistsFail = StackstormServiceTests.class.getResourceAsStream("/trigger-exists-fail.json");
+        String bodyTriggerExistsFail = IOUtils.toString(triggerExistsFail, Charset.defaultCharset());
+        mockServer.when(request().withMethod("GET").withPath("/api/v1/triggertypes/" + triggerFullNameNotCreated))
+                .respond(response().withBody(bodyTriggerExistsFail).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(404));
+
+        InputStream triggerCreated = StackstormServiceTests.class.getResourceAsStream("/trigger-created.json");
+        String bodyTriggerCreated = IOUtils.toString(triggerCreated, Charset.defaultCharset());
+        mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes/" + triggerFullNameNotCreated).withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameNotCreated))
+                .respond(response().withBody(bodyTriggerCreated).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(201));
+
+        mockServer.when(request().withMethod("POST").withPath("/api/v1/webhooks/st2").withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameNotCreated))
+                .respond(response().withStatusCode(500));
     }
 
     @Test
@@ -168,12 +156,9 @@ public class StackstormServiceTests {
         event.setMetadata(metadata);
         event.setPayload(payload);
 
-        startMockServer();
         mockSendTriggerCreated();
 
         assertTrue(stackstormService.send(mapper.valueToTree(event)));
-        stopMockServer();
-
     }
 
     @Test
@@ -190,12 +175,9 @@ public class StackstormServiceTests {
         event.setMetadata(metadata);
         event.setPayload(payload);
 
-        startMockServer();
         mockSendTriggerNotCreated();
 
         assertTrue(stackstormService.send(mapper.valueToTree(event)));
-        stopMockServer();
-
     }
 
     @Test
@@ -212,14 +194,12 @@ public class StackstormServiceTests {
         event.setMetadata(metadata);
         event.setPayload(payload);
 
-        startMockServer();
         mockCreateTriggerWithoutName();
 
-        assertTrue(stackstormService.send(mapper.valueToTree(event)));
-        stopMockServer();
-
+        assertFalse(stackstormService.send(mapper.valueToTree(event)));
     }
 
+    @Ignore
     @Test(expected = ExecutionException.class)
     public void checkConnectionFailedCreateTriggerIfNecessaryTest() throws Exception {
 
@@ -236,50 +216,10 @@ public class StackstormServiceTests {
         event.setPayload(payload);
 
         stackstormService.sender(mapper.valueToTree(event)).createTriggerIfNecessary();
-
-    }
-
-    @Test(expected = ExecutionException.class)
-    public void checkConnectionFailedCheckIfTriggerExistsTest() throws Exception {
-
-        Event event = new Event();
-        event.setId("1");
-
-        Metadata metadata = new Metadata();
-        metadata.setTriggerName(triggerNameCreated);
-
-        ObjectNode payload = mapper.createObjectNode();
-        payload.put("attribute1", "value1");
-
-        event.setMetadata(metadata);
-        event.setPayload(payload);
-
-        requestService.checkIfTriggerExists(triggerNameCreated);
-
-    }
-
-    @Test(expected = ExecutionException.class)
-    public void checkConnectionFailedCreateTriggerTest() throws Exception {
-
-        Event event = new Event();
-        event.setId("1");
-
-        Metadata metadata = new Metadata();
-        metadata.setTriggerName(triggerNameCreated);
-
-        ObjectNode payload = mapper.createObjectNode();
-        payload.put("attribute1", "value1");
-
-        event.setMetadata(metadata);
-        event.setPayload(payload);
-
-        JsonNode schema = jsonSchemaGeneratorService.extract(mapper.valueToTree(event));
-        requestService.createTrigger(schema);
     }
 
     @Test(expected = RuntimeException.class)
-    public void checkConnectionFailedSendToTriggerTest() throws Exception {
-
+    public void SendToTrigger500Test() throws Exception {
         Event event = new Event();
         event.setId("1");
 
@@ -292,13 +232,48 @@ public class StackstormServiceTests {
         event.setMetadata(metadata);
         event.setPayload(payload);
 
-        startMockServer();
         mockTriggerExist500();
 
         stackstormService.sender(mapper.valueToTree(event)).createTriggerIfNecessary();
+    }
 
-        stopMockServer();
+    @Test
+    public void CreateTrigger500Test() throws Exception {
+        Event event = new Event();
+        event.setId("1");
 
+        Metadata metadata = new Metadata();
+        metadata.setTriggerName(triggerNameNotCreated);
+
+        ObjectNode payload = mapper.createObjectNode();
+        payload.put("attribute1", "value1");
+
+        event.setMetadata(metadata);
+        event.setPayload(payload);
+
+        mockCreateTrigger500();
+
+        assertFalse(stackstormService.send(mapper.valueToTree(event)));
+
+    }
+
+    @Test
+    public void SendTrigger500Test() throws Exception {
+        Event event = new Event();
+        event.setId("1");
+
+        Metadata metadata = new Metadata();
+        metadata.setTriggerName(triggerNameNotCreated);
+
+        ObjectNode payload = mapper.createObjectNode();
+        payload.put("attribute1", "value1");
+
+        event.setMetadata(metadata);
+        event.setPayload(payload);
+
+        mockSendTrigger500();
+
+        assertFalse(stackstormService.send(mapper.valueToTree(event)));
     }
 
 }
