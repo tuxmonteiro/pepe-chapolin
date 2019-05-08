@@ -149,6 +149,23 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+              <argLine>
+                  -server
+                  -Xmx2048m -Xms2048m
+                  -Dauth_method=LDAP_TEST
+                  -DINTERNAL_PASSWORD=password
+                  -DIGNITE_JETTY_PORT=50001
+                  -Dmanagement.port=9001
+              </argLine>
+              <includes>
+                  <include>**/suites/*</include>
+              </includes>
+          </configuration>
+      </plugin>
     </plugins>
   </build>
 

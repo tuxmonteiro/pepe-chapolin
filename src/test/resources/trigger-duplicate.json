@@ -1,0 +1,4 @@
+{
+  "conflict-id": "5ccc8eb565d69201625f9acd",
+  "faultstring": "Tried to save duplicate unique keys (E11000 duplicate key error collection: st2.trigger_type_d_b index: uid_1 dup key: { : \"trigger_type:pepe:trigger.triggerNameOK\" })"
+}
