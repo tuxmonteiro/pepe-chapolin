@@ -90,10 +90,15 @@ public class RequestService {
     }
 
     public boolean createTrigger(JsonNode schema) throws Exception {
-        String createTriggerURL = stackStormUrl + "/triggertypes";
         String triggerName = PACK_NAME + "." + schema.get("name").asText();
+        String createTriggerURL = stackStormUrl + "/triggertypes/" + triggerName;
         Response response = post(createTriggerURL, schema.toString(), triggerName);
-        return response.getStatusCode() == 201;
+        if (response.getStatusCode() == 201) {
+            return true;
+        } else if (response.getStatusCode() == 409) {
+            return false;
+        }
+        throw new RuntimeException("ST2 Server Error: " + response.getResponseBody());
     }
 
     public boolean sendToTrigger(String triggerName, JsonNode payload) throws Exception {
@@ -101,7 +106,10 @@ public class RequestService {
         final ObjectNode requestBody = mapper.createObjectNode();
         requestBody.put("trigger", triggerName).set("payload", payload);
         Response response = post(sendToTriggerURL, requestBody.toString(), triggerName);
-        return response.getStatusCode() == 202;
+        if (response.getStatusCode() == 202) {
+            return true;
+        }
+        throw new RuntimeException("ST2 Server Error: " + response.getResponseBody());
     }
 
 }
