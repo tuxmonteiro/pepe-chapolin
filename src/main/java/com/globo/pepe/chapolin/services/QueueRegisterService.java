@@ -25,7 +25,6 @@ import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.common.services.JsonLoggerService.JsonLogger;
 import com.rabbitmq.http.client.domain.QueueInfo;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -79,7 +78,7 @@ public class QueueRegisterService {
     }
 
     private void retryEventOnFail(String queue, Message message) {
-        amqpService.convertAndSend(queue, Arrays.toString(message.getBody()), eventTtl);
+        amqpService.convertAndSend(queue, new String(message.getBody()), eventTtl);
     }
 
     @Scheduled(fixedDelayString = "${pepe.chapolin.sync_delay}")
