@@ -105,7 +105,7 @@ public class JsonSchemaGeneratorService {
             payload_schema.set("properties", properties);
             payload_schema.put("type", "object");
 
-            schema.set("parameters_schema",  payload_schema);
+            schema.set("payload_schema",  payload_schema);
             schema.set("tags", mapper.createArrayNode());
 
             return schema;
