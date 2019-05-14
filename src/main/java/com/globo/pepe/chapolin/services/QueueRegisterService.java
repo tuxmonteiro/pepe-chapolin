@@ -25,12 +25,10 @@ import com.globo.pepe.common.services.JsonLoggerService;
 import com.globo.pepe.common.services.JsonLoggerService.JsonLogger;
 import com.rabbitmq.http.client.domain.QueueInfo;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageListener;
+import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -60,8 +58,9 @@ public class QueueRegisterService {
 
     public void register(String queue) {
         JsonLogger logger = jsonLoggerService.newLogger(getClass());
-        final MessageListener messageListener = message -> {
+        final ChannelAwareMessageListener messageListener = (message, channel) -> {
             boolean wasSend = false;
+            long deliveryTag = message.getMessageProperties().getDeliveryTag();
             try {
                 byte[] messageBody = message.getBody();
                 logger.message("send " + new String(messageBody)).put("queue", queue).sendInfo();
@@ -69,17 +68,15 @@ public class QueueRegisterService {
             } catch (IOException e) {
                 logger.message(e.getMessage()).sendError(e);
             }
-            if (!wasSend) {
-                retryEventOnFail(queue, message);
+            if (wasSend) {
+                channel.basicAck(deliveryTag, false);
+            } else {
+                channel.basicNack(deliveryTag, false, true);
             }
         };
         amqpService.newQueue(queue);
         amqpService.prepareListenersMap(queue);
         amqpService.registerListener(queue, messageListener);
-    }
-
-    private void retryEventOnFail(String queue, Message message) {
-        amqpService.convertAndSend(queue, Arrays.toString(message.getBody()), eventTtl);
     }
 
     @Scheduled(fixedDelayString = "${pepe.chapolin.sync_delay}")

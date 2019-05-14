@@ -57,7 +57,7 @@ public class RequestServiceTests {
 
         InputStream triggerDuplicated = StackstormServiceTests.class.getResourceAsStream("/trigger-duplicate.json");
         String bodyTriggerDuplicated = IOUtils.toString(triggerDuplicated, Charset.defaultCharset());
-        mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes/" + triggerFullNameCreated).withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameCreated))
+        mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes").withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameCreated))
                 .respond(response().withBody(bodyTriggerDuplicated).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(409));
     }
 

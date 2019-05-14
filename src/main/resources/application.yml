@@ -22,6 +22,12 @@ amqp:
     password: ${RABBIT_MANAGEMENT_PASSWORD:guest}
 
 spring:
+  rabbitmq:
+    listener:
+      type: simple
+      simple:
+        acknowledge-mode: manual
+        prefetch: 1
   pid:
     file: ${PID_FILE:/tmp/pepe-chapolin.pid}
 

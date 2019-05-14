@@ -81,7 +81,7 @@ public class RequestService {
         String checkTriggerURL = stackStormUrl + "/triggertypes/" + triggerName;
         Response response = get(checkTriggerURL);
         if (response.getStatusCode() >= 500) {
-            throw new RuntimeException("ST2 Server Error: " + response.getResponseBody());
+            throw new RuntimeException("ST2 Server Error " + response.getStatusCode() + " : " + response.getResponseBody());
         }
         JsonNode ref;
         return response.getStatusCode() == 200 &&
@@ -91,14 +91,14 @@ public class RequestService {
 
     public boolean createTrigger(JsonNode schema) throws Exception {
         String triggerName = PACK_NAME + "." + schema.get("name").asText();
-        String createTriggerURL = stackStormUrl + "/triggertypes/" + triggerName;
+        String createTriggerURL = stackStormUrl + "/triggertypes";
         Response response = post(createTriggerURL, schema.toString(), triggerName);
         if (response.getStatusCode() == 201) {
             return true;
         } else if (response.getStatusCode() == 409) {
             return false;
         }
-        throw new RuntimeException("ST2 Server Error: " + response.getResponseBody());
+        throw new RuntimeException("ST2 Server Error " + response.getStatusCode() + " : " + response.getResponseBody());
     }
 
     public boolean sendToTrigger(String triggerName, JsonNode payload) throws Exception {
