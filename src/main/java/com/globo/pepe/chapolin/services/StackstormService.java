@@ -80,9 +80,6 @@ public class StackstormService {
             final JsonLogger logger = loggerService.newLogger(getClass());
             logger.message("send event ID " + event.getId() +
                     " to trigger " + triggerFullName).sendInfo();
-            if (logger.isDebugEnabled()) {
-                System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(originalJson));
-            }
             return requestService.sendToTrigger(triggerFullName, originalJson);
         }
 
