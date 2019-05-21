@@ -92,7 +92,7 @@ public class StackstormService {
             Boolean triggerExists = requestService.checkIfTriggerExists(triggerFullName);
             if (!triggerExists) {
                 JsonNode schema = jsonSchemaGeneratorService.extract(originalJson);
-                Boolean triggerDuplicated = requestService.createTrigger(schema);
+                boolean triggerDuplicated = requestService.createTrigger(schema);
                 if (!triggerDuplicated) {
                     logger.message("trigger " + triggerFullName + " created. Using schema: " + schema.toString()).sendInfo();
                 } else {
