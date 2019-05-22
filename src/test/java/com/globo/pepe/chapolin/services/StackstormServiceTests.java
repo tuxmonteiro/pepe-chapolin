@@ -81,7 +81,7 @@ public class StackstormServiceTests {
 
         InputStream triggerCreated = StackstormServiceTests.class.getResourceAsStream("/trigger-created.json");
         String bodyTriggerCreated = IOUtils.toString(triggerCreated, Charset.defaultCharset());
-        mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes/" + triggerFullNameNotCreated).withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameNotCreated))
+        mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes").withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameNotCreated))
                 .respond(response().withBody(bodyTriggerCreated).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(201));
 
         InputStream eventSentWithNewTrigger = StackstormServiceTests.class.getResourceAsStream("/event-sent.json");
@@ -121,7 +121,7 @@ public class StackstormServiceTests {
         mockServer.when(request().withMethod("GET").withPath("/api/v1/triggertypes/"+ triggerFullNameNotCreated))
                 .respond(response().withBody(bodyTriggerExistsFail).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(404));
 
-        mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes/"+ triggerFullNameNotCreated))
+        mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes"))
                 .respond(response().withStatusCode(500));
     }
 
@@ -135,7 +135,7 @@ public class StackstormServiceTests {
 
         InputStream triggerCreated = StackstormServiceTests.class.getResourceAsStream("/trigger-created.json");
         String bodyTriggerCreated = IOUtils.toString(triggerCreated, Charset.defaultCharset());
-        mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes/" + triggerFullNameNotCreated).withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameNotCreated))
+        mockServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes").withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameNotCreated))
                 .respond(response().withBody(bodyTriggerCreated).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(201));
 
         mockServer.when(request().withMethod("POST").withPath("/api/v1/webhooks/st2").withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameNotCreated))
