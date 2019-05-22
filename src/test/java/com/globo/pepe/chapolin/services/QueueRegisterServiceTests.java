@@ -3,6 +3,7 @@ package com.globo.pepe.chapolin.services;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fridujo.rabbitmq.mock.MockConnectionFactory;
+import com.globo.pepe.chapolin.configuration.HttpClientConfiguration;
 import com.globo.pepe.chapolin.mocks.AmqpMockConfiguration;
 import com.globo.pepe.common.services.AmqpService;
 import com.globo.pepe.common.services.JsonLoggerService;
@@ -28,9 +29,21 @@ import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ContextConfiguration(classes = {QueueRegisterService.class, StackstormService.class, RequestService.class, AmqpService.class, AmqpMockConfiguration.class, JsonLoggerService.class, ObjectMapper.class, JsonSchemaGeneratorService.class}, loader = AnnotationConfigContextLoader.class)
+@ContextConfiguration(classes = {
+    QueueRegisterService.class,
+    StackstormService.class,
+    RequestService.class,
+    AmqpService.class,
+    AmqpMockConfiguration.class,
+    JsonLoggerService.class,
+    ObjectMapper.class,
+    JsonSchemaGeneratorService.class,
+    HttpClientConfiguration.class,
+    StackstormAuthService.class
+}, loader = AnnotationConfigContextLoader.class)
 @TestPropertySource(properties = {
-        "pepe.event.ttl=10000"
+        "pepe.event.ttl=10000",
+        "pepe.chapolin.sleep_interval_on_fail=1"
 })
 public class QueueRegisterServiceTests {
 

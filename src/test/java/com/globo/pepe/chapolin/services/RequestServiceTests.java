@@ -12,6 +12,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.globo.pepe.chapolin.configuration.HttpClientConfiguration;
 import com.globo.pepe.common.model.Event;
 import com.globo.pepe.common.model.Metadata;
 import com.globo.pepe.common.services.JsonLoggerService;
@@ -36,9 +37,18 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
         "pepe.chapolin.stackstorm.api=http://127.0.0.1:9101/api/v1",
         "pepe.chapolin.stackstorm.auth=http://127.0.0.1:9100/auth/v1",
         "pepe.chapolin.stackstorm.login=u_pepe",
-        "pepe.chapolin.stackstorm.password=u_pepe"
+        "pepe.chapolin.stackstorm.password=u_pepe",
+        "pepe.chapolin.sleep_interval_on_fail=1"
 })
-@ContextConfiguration(classes = {StackstormService.class, RequestService.class, JsonLoggerService.class, ObjectMapper.class, JsonSchemaGeneratorService.class}, loader = AnnotationConfigContextLoader.class)
+@ContextConfiguration(classes = {
+    StackstormService.class,
+    RequestService.class,
+    JsonLoggerService.class,
+    ObjectMapper.class,
+    JsonSchemaGeneratorService.class,
+    HttpClientConfiguration.class,
+    StackstormAuthService.class
+}, loader = AnnotationConfigContextLoader.class)
 public class RequestServiceTests {
 
     private static final String triggerNameCreated = "triggerNameOK";

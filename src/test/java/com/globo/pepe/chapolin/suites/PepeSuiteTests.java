@@ -57,11 +57,10 @@ public class PepeSuiteTests {
     }
 
     public static void mockApiServerApiKeyCreated() throws IOException {
-        InputStream tokenCreatedIS = RequestServiceTests.class.getResourceAsStream("/apikey-created.json");
-        String tokenCreated = IOUtils.toString(tokenCreatedIS, Charset.defaultCharset());
+        InputStream apikeyCreatedIS = RequestServiceTests.class.getResourceAsStream("/apikey-created.json");
+        String apikeyCreated = IOUtils.toString(apikeyCreatedIS, Charset.defaultCharset());
         mockApiServer.when(request().withMethod("POST").withPath("/api/v1/apikey"))
-            .respond(response().withBody(tokenCreated).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(
-                HttpStatus.CREATED.value()));
+            .respond(response().withBody(apikeyCreated).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(HttpStatus.CREATED.value()));
     }
 
     public static void startMockServerRabbit() {
