@@ -49,6 +49,16 @@
       "name": "pepe.event.ttl",
       "type": "java.lang.Long",
       "description": "Event TTL"
+    },
+    {
+      "name": "pepe.chapolin.sleep_interval_on_fail",
+      "type": "java.lang.Long",
+      "description": "If stackstorm is failed, sleep consumer (in seconds)"
+    },
+    {
+      "name": "pepe.chapolin.sync_delay",
+      "type": "java.lang.Long",
+      "description": "Check new/delete queues interval and update sync"
     }
   ]
 }
