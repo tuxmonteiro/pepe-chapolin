@@ -8,8 +8,8 @@ pepe:
     sync_delay: ${SCHED:10000}
     sleep_interval_on_fail: ${SLEEP_ON_FAIL:1} # seconds
     stackstorm:
-      api: ${STACKSTORM_API_URL:http://127.0.0.0:9101/v1}
-      auth: ${STACKSTORM_AUTH_URL:http://127.0.0.0:9100/v1}
+      api: ${STACKSTORM_API_URL:http://127.0.0.0:9101/api/v1}
+      auth: ${STACKSTORM_AUTH_URL:http://127.0.0.0:9100/auth/v1}
       login: ${STACKSTORM_LOGIN:u_pepe}
       password: ${STACKSTORM_PASSWORD:secret}
   logging:
