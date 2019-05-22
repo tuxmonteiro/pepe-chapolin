@@ -2,12 +2,14 @@ package com.globo.pepe.chapolin.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fridujo.rabbitmq.mock.MockConnectionFactory;
 import com.globo.pepe.chapolin.mocks.AmqpMockConfiguration;
 import com.globo.pepe.common.services.AmqpService;
 import com.globo.pepe.common.services.JsonLoggerService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.springframework.amqp.rabbit.connection.AbstractConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -41,18 +43,14 @@ public class QueueRegisterServiceTests {
     @MockBean
     public StackstormService stackstormService;
 
-    public void mockRegister() {
-
-    }
-
     public void setup() {
         stackstormService = Mockito.mock(StackstormService.class);
     }
 
-//    @Test
-//    public void connectionFactoryIsMock() {
-//        assertTrue(((AbstractConnectionFactory)amqpService.connectionFactory()).getRabbitConnectionFactory() instanceof MockConnectionFactory);
-//    }
+    @Test
+    public void connectionFactoryIsMock() {
+        assertTrue(((AbstractConnectionFactory)amqpService.connectionFactory()).getRabbitConnectionFactory() instanceof MockConnectionFactory);
+    }
 
     @Test
     public void sendMessageSuccessTest() throws InterruptedException {

@@ -26,6 +26,26 @@
       "description": "Define logging tags (useful to Graylog)."
     },
     {
+      "name": "pepe.chapolin.stackstorm.api",
+      "type": "java.lang.String",
+      "description": "Stackstorm API URL"
+    },
+    {
+      "name": "pepe.chapolin.stackstorm.auth",
+      "type": "java.lang.String",
+      "description": "Stackstorm AUTH URL"
+    },
+    {
+      "name": "pepe.chapolin.stackstorm.login",
+      "type": "java.lang.String",
+      "description": "Stackstorm Login"
+    },
+    {
+      "name": "pepe.chapolin.stackstorm.password",
+      "type": "java.lang.String",
+      "description": "Stackstorm Password"
+    },
+    {
       "name": "pepe.event.ttl",
       "type": "java.lang.Long",
       "description": "Event TTL"

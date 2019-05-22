@@ -27,6 +27,7 @@ import com.rabbitmq.http.client.domain.QueueInfo;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +44,9 @@ public class QueueRegisterService {
 
     @Value("${pepe.event.ttl}")
     private Long eventTtl;
+
+    @Value("${pepe.chapolin.sleep_interval_on_fail}")
+    private Long sleepIntervalOnFail; // seconds
 
     public QueueRegisterService(
         AmqpService amqpService,
@@ -72,6 +76,7 @@ public class QueueRegisterService {
                 channel.basicAck(deliveryTag, false);
             } else {
                 channel.basicNack(deliveryTag, false, true);
+                TimeUnit.SECONDS.sleep(sleepIntervalOnFail);
             }
         };
         amqpService.newQueue(queue);
