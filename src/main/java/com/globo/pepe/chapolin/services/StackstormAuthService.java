@@ -76,7 +76,7 @@ public class StackstormAuthService {
                 CONTENT_TYPE, Collections.singleton(APPLICATION_JSON_VALUE),
                 AUTHORIZATION, Collections.singleton("Basic " + credentials)
             );
-            Response responseToken = httpClient.post(stackStormAuthUrl + "/token", "{}", tokenHeaders);
+            Response responseToken = httpClient.post(stackStormAuthUrl + "/tokens", "{}", tokenHeaders);
             String token = null;
             if (responseToken.getStatusCode() == HttpStatus.CREATED.value()) {
                 String bodyTokenStr = responseToken.getResponseBody();
@@ -89,7 +89,7 @@ public class StackstormAuthService {
                     CONTENT_TYPE, Collections.singleton(APPLICATION_JSON_VALUE),
                     ST2_TOKEN_HEADER, Collections.singleton(token)
                 );
-                Response responseApikey = httpClient.post(stackStormApiUrl + "/apikey", "{}", apikeyHeaders);
+                Response responseApikey = httpClient.post(stackStormApiUrl + "/apikeys", "{}", apikeyHeaders);
                 String apikey = null;
                 if (responseApikey.getStatusCode() == HttpStatus.CREATED.value()) {
                     String bodyApikeyStr = responseApikey.getResponseBody();

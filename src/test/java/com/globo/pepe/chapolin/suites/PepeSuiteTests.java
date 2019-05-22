@@ -52,14 +52,14 @@ public class PepeSuiteTests {
 
         InputStream tokenCreatedIS = PepeSuiteTests.class.getResourceAsStream("/token-created.json");
         String tokenCreated = IOUtils.toString(tokenCreatedIS, Charset.defaultCharset());
-        mockAuthServer.when(request().withMethod("POST").withPath("/auth/v1/token"))
+        mockAuthServer.when(request().withMethod("POST").withPath("/auth/v1/tokens"))
             .respond(response().withBody(tokenCreated).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(HttpStatus.CREATED.value()));
     }
 
     public static void mockApiServerApiKeyCreated() throws IOException {
         InputStream apikeyCreatedIS = RequestServiceTests.class.getResourceAsStream("/apikey-created.json");
         String apikeyCreated = IOUtils.toString(apikeyCreatedIS, Charset.defaultCharset());
-        mockApiServer.when(request().withMethod("POST").withPath("/api/v1/apikey"))
+        mockApiServer.when(request().withMethod("POST").withPath("/api/v1/apikeys"))
             .respond(response().withBody(apikeyCreated).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(HttpStatus.CREATED.value()));
     }
 
