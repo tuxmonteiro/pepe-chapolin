@@ -84,7 +84,7 @@ public class StackstormService {
         }
 
         String extractTriggerInfo() {
-            return event.getMetadata().getTriggerName();
+            return event.getMetadata().getProject() + "." + event.getMetadata().getTriggerName();
         }
 
         void createTriggerIfNecessary() throws Exception {

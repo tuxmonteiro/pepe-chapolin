@@ -1,8 +1,8 @@
 {
-  "uid": "trigger_type:pepe:trigger.triggerNameOK",
+  "uid": "trigger_type:pepe:trigger.pepe.triggerNameOK",
   "parameters_schema": {},
   "tags": [],
-  "name": "trigger.triggerNameOK",
+  "name": "trigger.pepe.triggerNameOK",
   "payload_schema": {
     "type": "object",
     "properties": {
@@ -12,6 +12,6 @@
     }
   },
   "pack": "pepe",
-  "ref": "pepe.trigger.triggerNameOK",
+  "ref": "pepe.trigger.pepe.triggerNameOK",
   "id": "5cc22033d6b8321d0b32564e"
 }

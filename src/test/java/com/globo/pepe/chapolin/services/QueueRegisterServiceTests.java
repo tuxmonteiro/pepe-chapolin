@@ -42,6 +42,7 @@ import static org.mockito.Mockito.*;
     StackstormAuthService.class
 }, loader = AnnotationConfigContextLoader.class)
 @TestPropertySource(properties = {
+        "pepe.logging.tags=default",
         "pepe.event.ttl=10000",
         "pepe.chapolin.sleep_interval_on_fail=1"
 })
@@ -56,6 +57,8 @@ public class QueueRegisterServiceTests {
     @MockBean
     public StackstormService stackstormService;
 
+    private final String project = "pepe";
+
     public void setup() {
         stackstormService = Mockito.mock(StackstormService.class);
     }
@@ -67,7 +70,7 @@ public class QueueRegisterServiceTests {
 
     @Test
     public void sendMessageSuccessTest() throws InterruptedException {
-        String queueName = PACK_NAME + "." + TRIGGER_PREFIX + "." + "test";
+        String queueName = PACK_NAME + "." + TRIGGER_PREFIX + "." + project + "." + "test";
         boolean result = false;
         when(stackstormService.send(any(JsonNode.class))).thenReturn(result = invert(result));
         queueRegisterService.register(queueName);
@@ -80,7 +83,7 @@ public class QueueRegisterServiceTests {
 
     @Test
     public void sendMessageFailTest() throws InterruptedException {
-        String queueName = PACK_NAME + "." + TRIGGER_PREFIX + "." + "test";
+        String queueName = PACK_NAME + "." + TRIGGER_PREFIX + "." + project + "." + "test";
         boolean result = true;
         when(stackstormService.send(any(JsonNode.class))).thenReturn(result = invert(result));
         queueRegisterService.register(queueName);

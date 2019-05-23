@@ -51,8 +51,10 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 }, loader = AnnotationConfigContextLoader.class)
 public class RequestServiceTests {
 
-    private static final String triggerNameCreated = "triggerNameOK";
-    private static final String triggerFullNameCreated = PACK_NAME + "." + TRIGGER_PREFIX + "." + triggerNameCreated;
+    private static final String PROJECT = "pepe";
+    private static final String TRIGGER_NAME_DUPLICATED = "triggerNameOK";
+    private static final String TRIGGER_FULL_NAME_DUPLICATED =
+        PACK_NAME + "." + TRIGGER_PREFIX + "." + PROJECT + "." + TRIGGER_NAME_DUPLICATED;
 
     @Autowired
     private RequestService requestService;
@@ -70,7 +72,8 @@ public class RequestServiceTests {
 
         InputStream triggerDuplicated = StackstormServiceTests.class.getResourceAsStream("/trigger-duplicate.json");
         String bodyTriggerDuplicated = IOUtils.toString(triggerDuplicated, Charset.defaultCharset());
-        mockApiServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes").withHeader(X_PEPE_TRIGGER_HEADER, triggerFullNameCreated))
+        mockApiServer.when(request().withMethod("POST").withPath("/api/v1/triggertypes").withHeader(X_PEPE_TRIGGER_HEADER,
+            TRIGGER_FULL_NAME_DUPLICATED))
                 .respond(response().withBody(bodyTriggerDuplicated).withHeader("Content-Type", APPLICATION_JSON_VALUE).withStatusCode(409));
     }
 
@@ -80,7 +83,8 @@ public class RequestServiceTests {
         event.setId("2");
 
         Metadata metadata = new Metadata();
-        metadata.setTriggerName(triggerNameCreated);
+        metadata.setTriggerName(TRIGGER_NAME_DUPLICATED);
+        metadata.setProject(PROJECT);
 
         ObjectNode payload = mapper.createObjectNode();
         payload.put("attribute1", "value1");

@@ -47,15 +47,18 @@ public class JsonSchemaGeneratorService {
 
         private final JsonNode jsonNode;
         private final String triggerName;
+        private final String project;
 
         public Generator(JsonNode jsonNode) {
             this.jsonNode = jsonNode;
             final JsonNode triggerNameJson = jsonNode.get("metadata").get("trigger_name");
+            final JsonNode projectJson = jsonNode.get("metadata").get("project");
             this.triggerName = triggerNameJson.asText();
+            this.project = projectJson.asText();
         }
 
         public JsonNode extractSchema() {
-            String triggerFullName = TRIGGER_PREFIX + "." + triggerName;
+            String triggerFullName = TRIGGER_PREFIX + "." + project + "." + triggerName;
             ObjectNode schema = mapper.createObjectNode().put("name", triggerFullName)
                 .put("description", triggerFullName)
                 .put("pack", PACK_NAME)
