@@ -71,6 +71,7 @@ public class StackstormAuthService {
 
     private void resetIfNecessaryStackstormKey() throws Exception {
         if (stackstormKey == null) {
+            loggerService.newLogger(getClass()).message("Resetting stackstorm apikey").sendWarn();
             String credentials = getBasicCredentialsB64();
             final Map<CharSequence, Iterable<String>> tokenHeaders = Map.of(
                 CONTENT_TYPE, Collections.singleton(APPLICATION_JSON_VALUE),
@@ -99,7 +100,7 @@ public class StackstormAuthService {
                 }
                 if (apikey != null) {
                     stackstormKey = apikey;
-                    loggerService.newLogger(getClass()).message("Registred new stackstorm apikey").sendWarn();
+                    loggerService.newLogger(getClass()).message("Using new stackstorm apikey").sendWarn();
                 } else {
                     throw new RuntimeException("Stackstorm authentication problem");
                 }
