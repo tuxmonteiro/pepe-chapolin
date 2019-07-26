@@ -1,6 +1,5 @@
 RPM_VER=$(PEPE_VERSION)
 VERSION=${RPM_VER}
-RELEASE=$(shell date +%y%m%d%H%M)
 SERVICE=chapolin
 
 deploy-snapshot:
@@ -26,7 +25,7 @@ dist: package
       -t rpm \
       -n "pepe-${SERVICE}" \
       -v ${RPM_VER} \
-      --iteration ${RELEASE}.el7 \
+      --iteration ${RPM_VER}.el7 \
       -a noarch \
       --rpm-os linux \
       -m 'A-Team <a-team@corp.globo.com>' \
